@@ -12,17 +12,21 @@ business questions, different engine — and one deliberate design difference, e
 ## Layout
 
 ```
-notebooks/
+notebooks/                     The graded notebooks, in run order
   01_bronze_extract_load.py    Extract CSV -> Delta files, then spark.sql creates bronze tables
   02_gold_dimensions.py        dim_rider, dim_station, dim_date, dim_time
   03_gold_facts.py             fact_trip, fact_payment, + extra credit, + audits and outcome queries
+submission/                    The same three notebooks as executed .ipynb, with cell outputs
 docs/
   star_schema.md               The design: source analysis, grain, keys, outcome coverage
   star_schema.pdf              Diagram for the submission zip
   star_schema.png              Same diagram, for the markdown
-  findings.md                  Local validation results and the two defects it caught
+  findings.md                  What the local and lab runs proved, and the five defects they caught
+  run_evidence/                Each notebook as executed on the lab cluster, HTML with outputs
 tools/
+  00_fetch_data_databricks.py  Helper notebook: pulls the dataset into DBFS from the driver
   render_star_schema.py        Regenerates the diagram (matplotlib)
+  run_notebooks_locally.py     Runs the notebooks against local Spark before spending a lab attempt
 ```
 
 The notebooks are in **Databricks source format**. Import them straight into a Databricks
@@ -78,9 +82,24 @@ Zip the three exported `.ipynb` files together with `docs/star_schema.pdf` and s
   mode and the table is registered over them. See [`docs/findings.md`](docs/findings.md) for
   why.
 
-## Validated before the lab
+## Validated locally, then run for real
 
-All three notebooks were run end-to-end locally against the real CSVs (PySpark 3.5.9 +
-delta-spark 3.2.1) before spending a lab attempt — all cells pass, all eight foreign-key
-audits return zero orphans. That run caught two genuine defects; both are fixed here and
-documented in [`docs/findings.md`](docs/findings.md).
+All three notebooks were run end-to-end **locally** against the real CSVs (PySpark 3.5.9 +
+delta-spark 3.2.1) before spending a lab attempt, using
+[`tools/run_notebooks_locally.py`](tools/run_notebooks_locally.py). That caught two genuine
+defects. The **lab** run then caught three more that no local test could have — including a
+Unity Catalog restriction that would have blocked everything past the bronze load. All five
+are documented in [`docs/findings.md`](docs/findings.md).
+
+Final run: Azure Databricks, DBR 14.3 LTS, single-node `Standard_D4ds_v4`, full dataset.
+
+```
+gold.fact_trip                 4,584,921      gold.dim_rider      75,001
+gold.fact_payment              1,946,607      gold.dim_station       839
+gold.fact_rider_monthly        2,049,370      gold.dim_date        3,652
+gold.agg_rider_spend_vs_rides     74,116      gold.dim_time           24
+```
+
+All seven foreign-key audits returned **zero orphans**; no fact landed on the Unknown
+member; `fact_payment` totals **$19,457,105.25**. Every figure predicted from the offline
+duckdb pass matched exactly.
