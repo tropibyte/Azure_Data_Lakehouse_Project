@@ -1,0 +1,8 @@
+data/
+__pycache__/
+*.pyc
+local.env
+*.log
+.local-validation/
+.venv-spark/
+Azure_Data_Lakehouse_Project_submission.zip
