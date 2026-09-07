@@ -114,6 +114,48 @@ Checked with duckdb straight against the CSVs:
 | payments per rider per month | exactly 1, always |
 | membership split | 60,124 members / 14,876 casual |
 
+## Lab run — the real thing, at full scale
+
+All four notebooks ran to SUCCESS on Azure Databricks (DBR 14.3 LTS, single-node
+`Standard_D4ds_v4`), against the complete dataset rather than a sample. Verified by
+querying the resulting tables directly, not by trusting the run status:
+
+```
+bronze.rider                       75,000     gold.fact_trip                 4,584,921
+bronze.payment                  1,946,607     gold.fact_payment              1,946,607
+bronze.station                        838     gold.fact_rider_monthly        2,049,370
+bronze.trip                     4,584,921     gold.agg_rider_spend_vs_rides     74,116
+gold.dim_rider                     75,001     gold.dim_date                      3,652
+gold.dim_station                      839     gold.dim_time                         24
+```
+
+**All seven foreign-key audits returned 0 orphan rows**, and no fact landed on the `-1`
+Unknown member. `fact_trip` carries all 4,584,921 trips — 197 with a non-positive duration,
+average 21.79 minutes, longest 55,944.15 (38 days), rider ages 14 to 75. `fact_payment`
+totals **$19,457,105.25** across 1,946,607 payments from 2013-02-01 to 2022-02-01.
+
+Every one of those figures matches the duckdb prediction made before the lab ran — the 197
+bad durations, the 21.79-minute average, the 55,944.15 maximum, the 14–75 age range and the
+payment total all landed exactly. `03_gold_facts` took 3m46s for the whole gold layer.
+
+### Extra credit at full scale
+
+With all 4.58M trips rather than the 600k local sample, the pattern is cleaner and stronger:
+
+| rides/month band | riders | avg rides/mo | avg spend/mo | spend per ride |
+|---|---:|---:|---:|---:|
+| a. 0–1 | 49,291 | 0.08 | $9.59 | $99.59 |
+| b. 1–3 | 7,344 | 1.84 | $7.92 | $4.73 |
+| c. 3–6 | 5,892 | 4.33 | $7.65 | $1.85 |
+| d. 6–12 | 5,647 | 8.55 | $7.12 | $0.87 |
+| e. 12+ | 5,942 | 22.89 | $5.94 | $0.32 |
+
+Monthly spend declines steadily as ride frequency rises ($9.59 → $5.94), while cost per ride
+collapses by more than two orders of magnitude ($99.59 → $0.32). The heaviest riders are on
+effectively the same subscription as the lightest and simply extract far more from it. The
+`0–1` band is still dominated by riders who paid in months they never rode, which is what
+inflates its per-ride figure — worth stating rather than presenting as a clean finding.
+
 ## Gold output from the local run
 
 Row counts (trips from the 600k sample; everything else full):
