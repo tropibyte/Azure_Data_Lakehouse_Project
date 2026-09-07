@@ -2,6 +2,8 @@
 # MAGIC %md
 # MAGIC # Divvy Bikeshare Lakehouse — 01 · Bronze (Extract + Load)
 # MAGIC
+# MAGIC **Author:** Tarie Nosworthy
+# MAGIC
 # MAGIC **Run order:** `01_bronze_extract_load` → `02_gold_dimensions` → `03_gold_facts`
 # MAGIC
 # MAGIC | Step | What happens here |

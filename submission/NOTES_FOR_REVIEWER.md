@@ -1,5 +1,7 @@
 # Notes for the reviewer
 
+**Author:** Tarie Nosworthy
+
 Three notebooks, run in order: `01_bronze_extract_load` → `02_gold_dimensions` →
 `03_gold_facts`. All were executed on Azure Databricks against the full dataset and are
 submitted with their cell outputs. The star schema is `star_schema.pdf`.

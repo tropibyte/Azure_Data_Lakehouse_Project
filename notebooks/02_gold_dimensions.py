@@ -2,6 +2,8 @@
 # MAGIC %md
 # MAGIC # Divvy Bikeshare Lakehouse — 02 · Gold (Dimensions)
 # MAGIC
+# MAGIC **Author:** Tarie Nosworthy
+# MAGIC
 # MAGIC **Run order:** `01_bronze_extract_load` → **`02_gold_dimensions`** → `03_gold_facts`
 # MAGIC
 # MAGIC Builds the four conformed dimensions of the star schema from the bronze tables:
@@ -143,19 +145,11 @@ dim_rider = (
         F.floor(F.months_between(F.col("account_start_date"), F.col("birthday")) / F.lit(12)).cast("int"),
     )
     .withColumn("age_band_at_account_start", age_band(F.col("age_at_account_start")))
-    .withColumn(
-        "account_tenure_months",
-        F.floor(F.months_between(
-            F.coalesce(F.col("account_end_date"), F.current_date()),
-            F.col("account_start_date"),
-        )).cast("int"),
-    )
     .withColumn("is_account_open", F.col("account_end_date").isNull())
     .select(
         "rider_key", "rider_id", "first_name", "last_name", "address", "birthday",
         "account_start_date", "account_end_date", "is_member", "rider_type",
-        "age_at_account_start", "age_band_at_account_start",
-        "account_tenure_months", "is_account_open",
+        "age_at_account_start", "age_band_at_account_start", "is_account_open",
     )
 )
 

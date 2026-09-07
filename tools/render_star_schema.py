@@ -85,7 +85,6 @@ TABLES = [
         ("", "rider_type", "string"),
         ("", "age_at_account_start", "int"),
         ("", "age_band_at_account_start", "string"),
-        ("", "account_tenure_months", "int"),
         ("", "is_account_open", "boolean"),
     ]),
     ("fact_trip", "fact", 9.0, 10.1, 5.1, [
@@ -251,7 +250,8 @@ link((frm["right"], 4.7), (agg["left"], 4.7),
 ax.text(0.55, 15.35, "Divvy Bikeshare - Lakehouse Star Schema", fontsize=25,
         fontweight="bold", color=INK, family="DejaVu Sans", va="top")
 ax.text(0.55, 14.65,
-        "Azure Databricks - bronze Delta files to a gold star schema",
+        "Azure Databricks - bronze Delta files to a gold star schema   |   "
+        "Tarie Nosworthy",
         fontsize=12.5, color=MUTED, family="DejaVu Sans", va="top")
 
 legend = [("fact", "Fact table"), ("dim", "Dimension"),

@@ -2,6 +2,8 @@
 # MAGIC %md
 # MAGIC # Divvy Bikeshare Lakehouse — 03 · Gold (Facts)
 # MAGIC
+# MAGIC **Author:** Tarie Nosworthy
+# MAGIC
 # MAGIC **Run order:** `01_bronze_extract_load` → `02_gold_dimensions` → **`03_gold_facts`**
 # MAGIC
 # MAGIC Builds the fact tables at the centre of the star schema, using the surrogate keys

@@ -92,7 +92,6 @@ erDiagram
         string  rider_type "Member/Casual"
         int     age_at_account_start
         string  age_band_at_account_start
-        int     account_tenure_months
         boolean is_account_open
     }
     dim_station {
