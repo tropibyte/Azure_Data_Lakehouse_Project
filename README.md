@@ -34,13 +34,16 @@ workspace (`Workspace` → `Import` → `File`) and they arrive as notebooks wit
 
 ## Running it in the lab
 
-1. **Start a cluster.** Single node, `Standard_DS3_v2`, Databricks runtime **≥ 10.0**. The lab
-   caps you at 8 cores, so a single node is the safe choice.
-2. **Upload the four CSVs** to DBFS — `Data` → `Create Table` → `Upload File`, or the DBFS
-   file browser (enable it at `Admin Console` → `Workspace Settings` → `Advanced` →
-   `DBFS File Browser`). They land in `dbfs:/FileStore/tables/`.
-   `trips.csv` is ~440 MB; Spark reads gzip directly, so uploading `trips.csv.gz` instead is
-   about a quarter of the bytes and needs no code change.
+1. **Start a cluster.** Single node, Databricks runtime **≥ 10.0**. The lab documents
+   `Standard_DS3_v2` / `Standard_DS4_v2`, but both were stocked out in East US when this ran —
+   any 4-core type in the workspace's node list stays inside the 8-core regional cap, and
+   `Standard_D4ds_v4` worked.
+2. **Get the four CSVs into DBFS.** Easiest is to run
+   [`tools/00_fetch_data_databricks.py`](tools/00_fetch_data_databricks.py) as a notebook: it
+   pulls the 128 MB course archive to the driver and unpacks it into
+   `dbfs:/FileStore/tables/` in about a minute. Uploading by hand works too — `Data` →
+   `Create Table` → `Upload File` — but `trips.csv` is ~440 MB. Spark reads gzip directly, so
+   `trips.csv.gz` is a quarter of the bytes and needs no code change.
 3. **Import the three notebooks** and attach them to the cluster.
 4. **Run them in order:** `01_bronze_extract_load` → `02_gold_dimensions` → `03_gold_facts`.
    If `SOURCE_DIR` in notebook 01 does not match where you put the files, change that one
@@ -100,6 +103,6 @@ gold.fact_rider_monthly        2,049,370      gold.dim_date        3,652
 gold.agg_rider_spend_vs_rides     74,116      gold.dim_time           24
 ```
 
-All seven foreign-key audits returned **zero orphans**; no fact landed on the Unknown
+All eight foreign-key audits returned **zero orphans**; no fact landed on the Unknown
 member; `fact_payment` totals **$19,457,105.25**. Every figure predicted from the offline
 duckdb pass matched exactly.

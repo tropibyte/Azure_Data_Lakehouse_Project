@@ -129,7 +129,7 @@ gold.dim_rider                     75,001     gold.dim_date                     
 gold.dim_station                      839     gold.dim_time                         24
 ```
 
-**All seven foreign-key audits returned 0 orphan rows**, and no fact landed on the `-1`
+**All eight foreign-key audits returned 0 orphan rows**, and no fact landed on the `-1`
 Unknown member. `fact_trip` carries all 4,584,921 trips — 197 with a non-positive duration,
 average 21.79 minutes, longest 55,944.15 (38 days), rider ages 14 to 75. `fact_payment`
 totals **$19,457,105.25** across 1,946,607 payments from 2013-02-01 to 2022-02-01.

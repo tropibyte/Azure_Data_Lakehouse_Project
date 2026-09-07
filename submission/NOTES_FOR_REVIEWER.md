@@ -98,7 +98,7 @@ submitted run, on the full dataset:
 | `gold.agg_rider_spend_vs_rides` *(extra credit)* | 74,116 |
 | `gold.dim_rider` / `dim_station` / `dim_date` / `dim_time` | 75,001 / 839 / 3,652 / 24 |
 
-All seven foreign-key audits return **zero orphan rows**, and no fact row landed on the
+All eight foreign-key audits return **zero orphan rows**, and no fact row landed on the
 Unknown member. `fact_payment` totals **$19,457,105.25** across 2013-02-01 to 2022-02-01.
 
 The extra credit answer: monthly spend falls from $9.59 to $5.94 as ride frequency rises,
