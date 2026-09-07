@@ -28,6 +28,14 @@ from pyspark.sql import functions as F
 
 spark.conf.set("spark.sql.shuffle.partitions", 8)
 
+# See notebook 01: Unity Catalog will not create tables over `dbfs:` locations, so pin
+# the session to the Hive metastore where the bronze and gold Delta files live.
+try:
+    spark.sql("USE CATALOG hive_metastore")
+    print("catalog: hive_metastore")
+except Exception:
+    print("catalog: workspace default (no Unity Catalog here)")
+
 
 def write_gold(df, table_name):
     """Write `df` to Delta in overwrite mode and register it as gold.<table_name>.

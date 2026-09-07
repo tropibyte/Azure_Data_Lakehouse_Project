@@ -6,3 +6,4 @@ local.env
 .local-validation/
 .venv-spark/
 Azure_Data_Lakehouse_Project_submission.zip
+docs/run_evidence/

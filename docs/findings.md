@@ -53,6 +53,49 @@ One environment-only issue also surfaced and is **not** a notebook defect: Spark
 needs `HADOOP_HOME`/`winutils.exe`, and `PYSPARK_PYTHON` must point at the venv interpreter or
 the Python worker fails to connect back. Neither applies in Databricks.
 
+## Three more defects the *lab* run caught
+
+The local run proved the Spark logic. It could not prove anything about the Azure
+environment, and the lab turned up three problems that no local test would ever surface.
+
+**1. Azure had no capacity for the prescribed VM sizes.** `Standard_DS3_v2` failed
+immediately with `CLOUD_PROVIDER_RESOURCE_STOCKOUT`; `Standard_DS4_v2` — the other SKU the
+lab documents — sat in "acquiring instances" for 30 minutes and never landed. Seven SKUs
+were tried before `Standard_D4ds_v4` took. Not a code defect, but worth knowing: if the
+lab's two documented sizes are unavailable, any 4-core type in the workspace's node list
+stays inside the 8-core regional cap, and `D4ds_v4` worked.
+
+**2. The dataset CDN blocks Python by User-Agent.** Downloading the course archive from the
+cluster driver returned `HTTP Error 403: Forbidden`, while the identical URL fetched fine
+locally with `curl`. The CDN allows browser User-Agents and rejects `Python-urllib/3.10`
+outright — verified by re-running the same request under three different agents. Fixed by
+sending a browser User-Agent in `00_fetch_data`.
+
+**3. The lab workspace has Unity Catalog enabled, and UC will not create tables over
+`dbfs:` locations.** The bronze load failed with:
+
+```
+[UC_FILE_SCHEME_FOR_TABLE_CREATION_NOT_SUPPORTED] Creating table in Unity Catalog with
+file scheme dbfs is not supported. SQLSTATE: 0AKUC
+```
+
+This is the one that mattered. Both data stores live in DBFS, so with Unity Catalog as the
+session's default catalog, **nothing past the bronze load could have run** — however clean
+the local run was. Local OSS Spark has no Unity Catalog, so the failure mode does not exist
+there. Fixed by pinning each notebook's session to the Hive metastore:
+
+```python
+try:
+    spark.sql("USE CATALOG hive_metastore")
+except Exception:
+    pass   # workspace without Unity Catalog: the default catalog is already the metastore
+```
+
+The pin is guarded, so it is a no-op on a workspace without UC. It is deliberately done in
+the notebooks rather than in the cluster's Spark config: a cluster-level setting would have
+required a restart, and in a region this short on capacity, giving up a running node to get
+a config change was not a trade worth making.
+
 ## Source data validation
 
 Checked with duckdb straight against the CSVs:

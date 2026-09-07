@@ -34,6 +34,15 @@ from pyspark.sql.window import Window
 from pyspark.sql.types import StructType, StructField
 
 spark.conf.set("spark.sql.shuffle.partitions", 8)
+
+# See notebook 01: Unity Catalog will not create tables over `dbfs:` locations, so pin
+# the session to the Hive metastore where the bronze and gold Delta files live.
+try:
+    spark.sql("USE CATALOG hive_metastore")
+    print("catalog: hive_metastore")
+except Exception:
+    print("catalog: workspace default (no Unity Catalog here)")
+
 spark.sql("CREATE DATABASE IF NOT EXISTS " + GOLD_DB)
 
 # COMMAND ----------

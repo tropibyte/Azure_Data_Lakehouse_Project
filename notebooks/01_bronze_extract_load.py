@@ -40,6 +40,16 @@ from pyspark.sql.types import (
 
 spark.conf.set("spark.sql.shuffle.partitions", 8)   # small data, single-node cluster
 
+# Unity Catalog refuses to create tables over `dbfs:` locations
+# (UC_FILE_SCHEME_FOR_TABLE_CREATION_NOT_SUPPORTED). Both data stores live in DBFS, so
+# pin the session to the workspace's Hive metastore, where DBFS-backed external tables
+# are supported. Workspaces without Unity Catalog have no such catalog and need no pin.
+try:
+    spark.sql("USE CATALOG hive_metastore")
+    print("catalog: hive_metastore")
+except Exception:
+    print("catalog: workspace default (no Unity Catalog here)")
+
 # COMMAND ----------
 
 # MAGIC %md
